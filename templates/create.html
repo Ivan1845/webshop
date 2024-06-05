@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Додавання товару</title>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Додавання товару</h1>
+    <form method="post">
+        <input type="text" class="form-control" name="title" id="title" placeholder="Введіть назву"><br>
+        <input type="number" class="form-control" name="price" id="price" placeholder="Введіть ціну"><br>
+        <input type="text" class="form-control" name="image_url" id="image_url" placeholder="Посилання на зображення"><br>
+        <button class="btn btn-success" type="submit">Додати товар</button>
+    </form>
+    <hr>
+    <h2>Список товарів</h2>
+    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+        {% for item in items %}
+        <div class="col">
+            <div class="card mb-4 rounded-3 shadow-sm">
+                <div class="card-header py-3">
+                    <h4 class="my-0 font-weight-normal">{{ item.title }}</h4>
+                </div>
+                <div class="card-body">
+                    {% if item.image_url %}
+                    <img src="{{ item.image_url }}" class="img-fluid" alt="{{ item.title }}">
+                    {% endif %}
+                    <h1 class="card-title pricing-card-title">{{ item.price }} <small class="text-muted">грн</small></h1>
+                    <a href="/update/{{ item.id }}" class="w-100 btn btn-lg btn-outline-primary mb-2">Редагувати</a>
+                    <a href="/delete/{{ item.id }}" class="w-100 btn btn-lg btn-outline-danger">Видалити</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+

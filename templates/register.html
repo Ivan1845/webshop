@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Реєстрація</title>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Реєстрація</h1>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert alert-warning" role="alert">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    <form method="post">
+        <div class="mb-3">
+            <label for="username" class="form-label">Ім'я користувача</label>
+            <input type="text" class="form-control" name="username" id="username" placeholder="Введіть ім'я користувача" required>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Пароль</label>
+            <input type="password" class="form-control" name="password" id="password" placeholder="Введіть пароль" required>
+        </div>
+        <button class="btn btn-success" type="submit">Зареєструватися</button>
+    </form>
+    <p class="mt-3">Вже маєте обліковий запис? <a href="{{ url_for('login') }}">Увійдіть тут</a></p>
+</div>
+{% endblock %}
+

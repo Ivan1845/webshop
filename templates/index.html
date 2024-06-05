@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Онлайн магазин</title>
+{% endblock %}
+
+{% block body %}
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">Штучні квіти</h1>
+    <p class="lead">Виберіть ідеальний букет для будь-якої нагоди. Висока якість квітів за доступними цінами!</p>
+</div>
+<div class="container">
+    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+        {% for item in data %}
+        <div class="col">
+            <div class="card mb-4 rounded-3 shadow-sm">
+                <div class="card-header py-3">
+                    <h4 class="my-0 font-weight-normal">{{ item.title }}</h4>
+                </div>
+                <div class="card-body">
+                    {% if item.image_url %}
+                    <img src="{{ item.image_url }}" class="img-fluid" alt="{{ item.title }}">
+                    {% endif %}
+                    <h1 class="card-title pricing-card-title">{{ item.price }} <small class="text-muted">грн</small></h1>
+                    <a href="/order/{{ item.id }}" role="button" class="w-100 btn btn-lg btn-outline-primary">Замовити</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+

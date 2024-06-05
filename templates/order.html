@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Замовлення</title>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Замовлення товару</h1>
+    {% if item.image_url %}
+    <img src="{{ item.image_url }}" class="img-fluid" alt="{{ item.title }}">
+    {% endif %}
+    <form method="POST" action="{{ url_for('item_buy', id=item.id) }}">
+        <div class="mb-3">
+            <label for="quantity" class="form-label">Кількість квіток</label>
+            <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required>
+        </div>
+        <div class="mb-3">
+            <h3 class="card-title pricing-card-title">Ціна: <span id="totalPrice">{{ item.price }}</span> грн</h3>
+        </div>
+        <button type="submit" class="btn btn-success">Купити</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('quantity').addEventListener('input', function() {
+    const quantity = this.value;
+    const itemPrice = {{ item.price }};
+    const totalPrice = quantity * itemPrice;
+    document.getElementById('totalPrice').innerText = totalPrice;
+});
+</script>
+{% endblock %}
