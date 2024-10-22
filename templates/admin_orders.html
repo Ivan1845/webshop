@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Список замовлень</title>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Список замовлень</h1>
+    {% if orders %}
+        <table class="table table-striped mt-4">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Ім'я клієнта</th>
+                    <th>Email</th>
+                    <th>Телефон</th>
+                    <th>Загальна ціна</th>
+                    <th>Статус</th>
+                    <th>Дата створення</th>
+                    <th>Дії</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ order.customer_name }}</td>
+                    <td>{{ order.customer_email }}</td>
+                    <td>{{ order.customer_phone }}</td>
+                    <td>{{ order.total_price }} грн</td>
+                    <td>
+                        <select class="order-status" data-order-id="{{ order.id }}">
+                            <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>В обробці</option>
+                            <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Відправлено</option>
+                            <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Доставлено</option>
+                            <option value="rejected" {% if order.status == 'rejected' %}selected{% endif %}>Відхилено</option>
+                        </select>
+                    </td>
+                    <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+
+                    <td><button class="btn btn-danger btn-sm delete-order" data-order-id="{{ order.id }}">Видалити</button></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Немає замовлень.</p>
+    {% endif %}
+</div>
+
+<!-- JS для динамічної взаємодії -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Обробка зміни статусу
+        document.querySelectorAll('.order-status').forEach(function(select) {
+            select.addEventListener('change', function() {
+                var orderId = this.getAttribute('data-order-id');
+                var newStatus = this.value;
+
+                fetch('/update_order_status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        'order_id': orderId,
+                        'new_status': newStatus
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                    } else {
+                        alert('Помилка при оновленні статусу.');
+                    }
+                });
+            });
+        });
+
+        // Обробка видалення замовлення
+        document.querySelectorAll('.delete-order').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var orderId = this.getAttribute('data-order-id');
+                if (confirm('Ви впевнені, що хочете видалити замовлення?')) {
+                    fetch('/delete_order', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            'order_id': orderId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Замовлення видалено успішно!');
+                            location.reload();  // Оновлюємо сторінку після видалення
+                        } else {
+                            alert('Помилка при видаленні замовлення.');
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

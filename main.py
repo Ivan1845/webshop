@@ -3,6 +3,9 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from cloudipsp import Api, Checkout
+from datetime import datetime
+from flask import jsonify, request
+
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///shop.db"
@@ -14,7 +17,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 
-#Моделі бази даних
+# Моделі бази даних
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
@@ -33,10 +36,20 @@ class Item(db.Model):
         return self.title
 
 
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    customer_name = db.Column(db.String(100), nullable=False)
+    customer_email = db.Column(db.String(120), nullable=False)
+    customer_phone = db.Column(db.String(20), nullable=False)
+    total_price = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(20), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 # Функція для завантаження користувача
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 # Головна сторінка
@@ -59,6 +72,7 @@ def order(id):
     return render_template('order.html', item=item)
 
 
+
 # Купівля товару
 @app.route('/buy/<int:id>', methods=['POST'])
 def item_buy(id):
@@ -66,6 +80,25 @@ def item_buy(id):
     quantity = int(request.form['quantity'])
     total_price = item.price * quantity
 
+    # Отримуємо дані з форми
+    customer_name = request.form['customer_name']
+    customer_email = request.form['customer_email']
+    customer_phone = request.form['customer_phone']
+
+    # Створюємо новий об'єкт замовлення
+    new_order = Order(
+        customer_name=customer_name,
+        customer_email=customer_email,
+        customer_phone=customer_phone,
+        total_price=total_price,
+        status="Очікує"
+    )
+
+    # Додаємо нове замовлення до бази даних
+    db.session.add(new_order)
+    db.session.commit()
+
+    # API для оплати (це залишаємо без змін)
     api = Api(merchant_id=1396424, secret_key='test')
     checkout = Checkout(api=api)
     data = {
@@ -73,7 +106,9 @@ def item_buy(id):
         "amount": total_price * 100,
     }
     url = checkout.url(data).get('checkout_url')
+
     return redirect(url)
+
 
 
 # Створення нового товару
@@ -215,6 +250,46 @@ def manage_users():
     return render_template('manage_users.html', users=users)
 
 
+# Список замовлень для адміністратора
+@app.route('/admin_orders')
+@login_required
+def admin_orders():
+    if current_user.role != 'admin':
+        return redirect(url_for('index'))
+
+    orders = Order.query.all()
+    return render_template('admin_orders.html', orders=orders)
+
+# Оновлення статусу замовлення
+@app.route('/update_order_status', methods=['POST'])
+@login_required
+def update_order_status():
+    data = request.get_json()
+    order_id = data.get('order_id')
+    new_status = data.get('new_status')
+
+    order = Order.query.get(order_id)
+    if order:
+        order.status = new_status
+        db.session.commit()
+        return jsonify({'success': True})
+    return jsonify({'success': False}), 400
+
+# Видалення замовлення
+@app.route('/delete_order', methods=['POST'])
+@login_required
+def delete_order():
+    data = request.get_json()
+    order_id = data.get('order_id')
+
+    order = Order.query.get(order_id)
+    if order:
+        db.session.delete(order)
+        db.session.commit()
+        return jsonify({'success': True})
+    return jsonify({'success': False}), 400
+
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
@@ -222,4 +297,4 @@ if __name__ == "__main__":
             admin_user = User(username='admin', password=generate_password_hash('adminpassword'), role='admin')
             db.session.add(admin_user)
             db.session.commit()
-    app.run(debug=False)
+    app.run(debug=True)

@@ -7,21 +7,42 @@
 {% block body %}
 <div class="container mt-5">
     <h1>Замовлення товару</h1>
+
+    <!-- Виведення картинки товару -->
     {% if item.image_url %}
     <img src="{{ item.image_url }}" class="img-fluid" alt="{{ item.title }}">
     {% endif %}
-    <form method="POST" action="{{ url_for('item_buy', id=item.id) }}">
-        <div class="mb-3">
-            <label for="quantity" class="form-label">Кількість квіток</label>
-            <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" required>
+
+    <!-- Форма замовлення -->
+    <form action="{{ url_for('item_buy', id=item.id) }}" method="POST" class="mt-4">
+        <div class="form-group">
+            <label for="quantity">Кількість:</label>
+            <input type="number" id="quantity" name="quantity" value="1" min="1" class="form-control" required>
         </div>
-        <div class="mb-3">
-            <h3 class="card-title pricing-card-title">Ціна: <span id="totalPrice">{{ item.price }}</span> грн</h3>
+
+        <div class="form-group">
+            <label for="customer_name">Ваше ім'я:</label>
+            <input type="text" id="customer_name" name="customer_name" class="form-control" required>
         </div>
-        <button type="submit" class="btn btn-success">Купити</button>
+
+        <div class="form-group">
+            <label for="customer_email">Електронна пошта:</label>
+            <input type="email" id="customer_email" name="customer_email" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="customer_phone">Телефон:</label>
+            <input type="text" id="customer_phone" name="customer_phone" class="form-control" required>
+        </div>
+
+        <!-- Виведення загальної ціни -->
+        <h3 class="mt-3">Загальна ціна: <span id="totalPrice">{{ item.price }}</span> грн</h3>
+
+        <button type="submit" class="btn btn-primary mt-3">Купити</button>
     </form>
 </div>
 
+<!-- Скрипт для підрахунку загальної ціни -->
 <script>
 document.getElementById('quantity').addEventListener('input', function() {
     const quantity = this.value;
@@ -30,4 +51,5 @@ document.getElementById('quantity').addEventListener('input', function() {
     document.getElementById('totalPrice').innerText = totalPrice;
 });
 </script>
+
 {% endblock %}
