@@ -24,6 +24,7 @@ Fondy. Інтеграція здійснюється за допомогою SDK
  - **webshop\templates\login.html** - шаблон для сторінки авторизації.
  - **webshop\templates\create.html** - шаблон для сторінки створення нового товару.
  - **webshop\templates\manage_users.html** - шаблон для сторінки керування користувачами.
+ - **webshop\templates\admin_orders.html** - шаблон для сторінки керування замовленнями користувачів.
  - **webshop\templates\update.html** - шаблон для сторінки оновлення товару.
  - **webshop\templates\order.html** - шаблон для сторінки замовлення товару.
 
